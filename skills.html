@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Shadow System — Tech Status</title>
+
+<!-- Google font -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg-dark: #07020a;
+    --panel-purple: rgba(120, 0, 160, 0.22);
+    --border-purple: rgba(170,80,255,0.95);
+    --glow-purple: rgba(180,90,255,0.25);
+    --accent: #d6a8ff;
+    --glass-border: rgba(200,120,255,0.18);
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: linear-gradient(180deg, #06010a 0%, #070217 100%);
+    color: #eae0ff;
+    overflow: hidden;
+  }
+
+  /* TOP & SIDE TECH BORDERS (purple, tech-like) */
+  .tech-frame {
+    position:fixed;
+    top:18px;
+    left:18px;
+    right:18px;
+    bottom:18px;
+    pointer-events:none;
+    border-radius:18px;
+    box-shadow:
+      0 0 60px rgba(140,45,255,0.45),
+      inset 0 0 40px rgba(110,20,200,0.35);
+    border: 2px solid rgba(120,20,200,0.55);
+    z-index:1;
+  }
+
+  /* decorative tech rails on top and sides (like Jinwoo) */
+  .tech-rail-top, .tech-rail-left, .tech-rail-right {
+    position: absolute;
+    pointer-events: none;
+  }
+  .tech-rail-top {
+    height: 10px;
+    left: 40px;
+    right: 40px;
+    top: 8px;
+    border-top: 3px solid var(--border-purple);
+    box-shadow: 0 0 18px var(--border-purple);
+    border-radius: 6px;
+  }
+  .tech-rail-left {
+    width: 10px;
+    top: 40px;
+    bottom: 40px;
+    left: 8px;
+    border-left: 3px solid var(--border-purple);
+    box-shadow: 0 0 18px var(--border-purple);
+    border-radius: 6px;
+  }
+  .tech-rail-right {
+    width: 10px;
+    top: 40px;
+    bottom: 40px;
+    right: 8px;
+    border-right: 3px solid var(--border-purple);
+    box-shadow: 0 0 18px var(--border-purple);
+    border-radius: 6px;
+  }
+
+  /* particles layer (white-ish mana) */
+  .particles {
+    position: fixed;
+    inset: 0;
+    z-index:2;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: rgba(255,255,255,0.85);
+    filter: blur(0.3px);
+    border-radius: 50%;
+    opacity: 0.95;
+    transform: translateY(0) scale(0.8);
+    box-shadow: 0 0 8px rgba(255,255,255,0.6);
+    will-change: transform, opacity;
+  }
+
+  /* central system window (glowing) */
+  .system-wrap {
+    position: absolute;
+    inset: 6vh 4vw;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2vh 2vw;
+  }
+
+  .system {
+    width: 100%;
+    height: 88vh;
+    max-width: 1350px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(10,6,20,0.6), rgba(5,6,18,0.45));
+    border: 2px solid var(--glass-border);
+    box-shadow:
+      0 0 40px rgba(140,45,255,0.12),
+      inset 0 0 30px rgba(80,20,140,0.08);
+    padding: 28px;
+    display: grid;
+    grid-template-columns: 32% 1fr; /* left stats 32%, right content 68% */
+    gap: 24px;
+    position: relative;
+  }
+
+  /* outer glow border for the window using pseudo-element */
+  .system::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    border-radius:14px;
+    pointer-events:none;
+    box-shadow: 0 0 45px rgba(170,80,255,0.14), inset 0 0 30px rgba(150,50,255,0.08);
+    border: 2px solid rgba(180,100,255,0.06);
+    mix-blend-mode: screen;
+  }
+  /* theme outline (strong glow) */
+  .system-outline {
+    position:absolute;
+    inset: -8px;
+    border-radius: 18px;
+    pointer-events:none;
+    box-shadow: 0 0 70px rgba(160,60,255,0.18);
+    border: 1px solid rgba(170,90,255,0.12);
+  }
+
+  /* LEFT: stacked stats (top-left inside window) */
+  .left-stats {
+    padding: 18px;
+    display:flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .status-header {
+    display:flex;
+    flex-direction: column;
+    gap:6px;
+    align-items:flex-start;
+  }
+  .title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight:700;
+    color: var(--accent);
+    letter-spacing: 2px;
+    font-size: 20px;
+    text-shadow: 0 0 12px rgba(210,150,255,0.18);
+  }
+  .subtitle {
+    font-size: 12px;
+    color: rgba(235,220,255,0.75);
+    opacity:0.9;
+  }
+
+  .stat-card {
+    background: linear-gradient(180deg, rgba(30,0,50,0.42), rgba(8,2,20,0.32));
+    border: 1px solid rgba(180,100,255,0.12);
+    padding: 12px;
+    border-radius: 10px;
+    box-shadow: 0 8px 18px rgba(90,10,140,0.06);
+  }
+
+  .stat-grid {
+    display:flex;
+    flex-direction: column;
+    gap:8px;
+    margin-top:8px;
+  }
+
+  .stat-row{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    align-items:center;
+    color: rgba(230,215,255,0.95);
+    font-size: 15px;
+  }
+  .stat-row small{ color: rgba(210,185,235,0.7); font-size:13px; }
+
+  /* attribute bars */
+  .attr {
+    margin-top:8px;
+  }
+  .attr-name{ font-size:13px; color: rgba(210,185,235,0.9); margin-bottom:6px; }
+  .bar-wrap{
+    width:100%;
+    height:10px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 10px;
+    overflow:hidden;
+    border: 1px solid rgba(255,255,255,0.02);
+  }
+  .bar-fill{
+    height:100%;
+    background: linear-gradient(90deg, rgba(170,80,255,0.95), rgba(220,120,255,0.75));
+    width: 0%;
+    border-radius:10px;
+    box-shadow: 0 0 18px rgba(180,90,255,0.15);
+    transition: width 1.6s cubic-bezier(.2,.9,.2,1);
+  }
+
+  /* RIGHT: skills scattered layout (70% area) */
+  .right-area {
+    padding: 8px 6px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* top row two cards side-by-side but visually staggered/float */
+  .top-row {
+    display:flex;
+    gap:20px;
+    align-items: flex-start;
+  }
+
+  .skill-card {
+    background: linear-gradient(180deg, rgba(28,6,44,0.36), rgba(10,4,18,0.28));
+    border: 1px solid rgba(190,120,255,0.12);
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 14px 28px rgba(110,30,180,0.06), inset 0 0 18px rgba(110,30,180,0.03);
+    flex:1;
+    min-height: 200px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .skill-card .img {
+    width:100%;
+    height:150px;
+    border-radius: 10px;
+    overflow:hidden;
+    margin-bottom:12px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.35));
+  }
+  .skill-card img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+  .skill-title{
+    font-family:'Orbitron', sans-serif;
+    font-weight:700;
+    color: var(--accent);	
+    font-size:18px;
+    margin-bottom:8px;
+    text-shadow: 0 0 8px rgba(200,150,255,0.12);
+  }
+  .skill-text{
+    font-size:14px;
+    line-height:1.55;
+    color: rgba(230,220,255,0.95);
+    max-height: 220px;
+    overflow:auto;
+    padding-right:6px;
+  }
+
+  /* big bottom card centered under top two */
+  .bottom-card {
+      margin: -130px auto 0 auto; /* moved up ~40px */
+      width: 100%;
+      min-height: 220px;
+      border-radius: 14px;
+      position: relative;
+  z-index: 3; /* ensures it floats above */
+  }
+
+  /* floating decorative glow shards */
+  .glow-shard {
+    position:absolute;
+    width:140px;
+    height:18px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(200,120,255,0.12));
+    top: 6%;
+    left: 34%;
+    filter: blur(8px);
+    transform: rotate(-6deg);
+    opacity:0.08;
+    pointer-events:none;
+  }
+
+  /* small system header (top center inside window) */
+  .sys-header {
+    position:absolute;
+    top:14px;
+    left:50%;
+    transform:translateX(-50%);
+    font-family:'Orbitron',sans-serif;
+    color:var(--accent);
+    font-size:13px;
+    letter-spacing:3px;
+    padding:6px 12px;
+    border-radius:8px;
+    border:1px solid rgba(200,150,255,0.06);
+    background: linear-gradient(90deg, rgba(20,6,40,0.3), rgba(8,3,24,0.35));
+    box-shadow: 0 6px 18px rgba(150,60,255,0.06);
+  }
+
+  /* responsive tweaks */
+  @media (max-width:980px){
+    .system{ grid-template-columns: 1fr; height: auto; padding-bottom:40px; }
+    .left-stats{ order:2; width:100%; }
+    .right-area{ order:1; width:100%; }
+    .top-row{ flex-direction: column; }
+    .bottom-card{ width:100%; }
+    .sys-header{ left: 16px; transform: translateX(0); }
+  }
+</style>
+</head>
+<body>
+
+  <!-- decorative rails and frame -->
+  <div class="tech-frame" aria-hidden="true">
+    <div class="tech-rail-top"></div>
+    <div class="tech-rail-left"></div>
+    <div class="tech-rail-right"></div>
+  </div>
+
+  <!-- white-ish mana particles -->
+  <div class="particles" id="particles" aria-hidden="true"></div>
+
+  <!-- central system window -->
+  <div class="system-wrap">
+    <div class="system" id="systemWindow" role="region" aria-label="Shadow System">
+
+      <div class="system-outline" aria-hidden="true"></div>
+      <div class="sys-header">SYSTEM STATUS</div>
+      <div class="glow-shard" aria-hidden="true"></div>
+
+      <!-- LEFT: Top-left stacked stats -->
+      <aside class="left-stats" aria-label="Stats Panel">
+        <div class="status-header">
+          <div class="title">⚛ DEATH</div>
+          <div class="subtitle">d3str0yer • The D3str0yer of the Worlds</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card">
+            <div class="stat-card" style="padding:0; border:none; box-shadow:none;">
+              <!-- Compact status summary -->
+              <div class="stat-card" style="padding:0; margin:0;">
+                <div class="stat-card stat-card" style="padding:0;">
+                  <div class="stat-card" style="padding:0;">
+                    <!-- Main status box -->
+                    <div class="stat-card" style="background:transparent; padding:0;">
+                      <div class="stat-card stat-card" style="padding:0;">
+                        <!-- Reused containers intentionally for layered glass look -->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Primary status box -->
+        <div class="stat-card" style="margin-top:6px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="font-weight:700; color:var(--accent); letter-spacing:1px;">STATUS</div>
+            <div style="font-size:13px; color:rgba(220,200,255,0.8)">Lv. <strong id="level">100</strong></div>
+          </div>
+
+          <div class="stat-grid">
+            <div class="stat-row"><small>Title</small><div style="color:var(--accent)">DEATH</div></div>
+            <div class="stat-row"><small>Class</small><div style="color:var(--accent)">UNKNOWN</div></div>
+            <div class="stat-row"><small>EXP</small><div style="color:var(--accent)">INFINITE</div></div>
+          </div>
+        </div>
+
+        <!-- Attributes box -->
+        <div class="stat-card">
+          <div style="font-weight:700; color:var(--accent); margin-bottom:6px;">ATTRIBUTES</div>
+
+          <div class="stat-row"><small>Strength</small><div style="color:var(--accent)">145</div></div>
+          <div class="attr">
+            <div class="attr-name">Power</div>
+            <div class="bar-wrap"><div class="bar-fill" data-fill="85%"></div></div>
+          </div>
+
+          <div class="stat-row" style="margin-top:6px;"><small>Agility</small><div style="color:var(--accent)">132</div></div>
+          <div class="attr">
+            <div class="attr-name">Speed</div>
+            <div class="bar-wrap"><div class="bar-fill" data-fill="78%"></div></div>
+          </div>
+
+          <div class="stat-row" style="margin-top:6px;"><small>Intelligence</small><div style="color:var(--accent)">152</div></div>
+          <div class="attr">
+            <div class="attr-name">Mind</div>
+            <div class="bar-wrap"><div class="bar-fill" data-fill="92%"></div></div>
+          </div>
+
+          <div class="stat-row" style="margin-top:6px;"><small>Mana</small><div style="color:var(--accent)">9999+</div></div>
+          <div class="attr">
+            <div class="attr-name">Aura</div>
+            <div class="bar-wrap"><div class="bar-fill" data-fill="100%"></div></div>
+          </div>
+        </div>
+
+        <!-- Additional stacked things you wanted -->
+        <div class="stat-card">
+          <div style="font-weight:700; color:var(--accent); margin-bottom:6px;">EXTRA</div>
+          <div class="stat-row"><small>Shadow Count</small><div style="color:var(--accent)">???</div></div>
+          <div class="stat-row"><small>Role</small><div style="color:var(--accent)">Mentor / Dev</div></div>
+          <div class="stat-row"><small>Tools</small><div style="color:var(--accent)">Alight Motion, IDEs, AI</div></div>
+        </div>
+      </aside>
+
+      <!-- RIGHT: Skills area (70%) -->
+      <main class="right-area" aria-label="Skills Area">
+
+        <!-- top row: two skill cards side-by-side (but floating feel) -->
+        <div class="top-row">
+          <!-- Coding card (image allowed) -->
+          <section class="skill-card" id="card-coding">
+            <div class="img">
+              <!-- Replace src with your coding image path -->
+              <img src="images/coding.jpg" alt="Coding image (replace with your own)" onerror="this.style.display='none'">
+            </div>
+            <div class="skill-title">Coding — Languages & Web</div>
+            <div class="skill-text">
+              I can make websites from scratch and fix complex layouts. I know Java, Python, HTML/CSS and can help with school projects
+              — from backend logic to frontend UI. I also teach these languages: structured lessons, practice tasks, and project-based learning.
+              <br><br>
+              <strong>Examples:</strong> responsive websites, JS interactivity, REST APIs, Java applications, Python scripts, automation tools, and
+              debugging large codebases. I build maintainable code and fast prototypes.
+            </div>
+          </section>
+
+          <!-- AI card -->
+          <section class="skill-card" id="card-ai">
+            <div class="img">
+              <!-- Replace src with your AI image path -->
+              <img src="images/ai.jpg" alt="AI image (replace with your own)" onerror="this.style.display='none'">
+            </div>
+            <div class="skill-title">AI — Idea → Product</div>
+            <div class="skill-text">
+              I use AI to design and build smarter websites, brainstorm product ideas, and automate workflows. I can integrate AI models,
+              create content pipelines, and generate UX copy, wireframes and prototype code with AI assistance.
+              <br><br>
+              <strong>Workflow:</strong> ideation → prompt engineering → prototype → iterate. I combine human creativity with AI speed to ship quickly.
+            </div>
+          </section>
+        </div>
+
+        <!-- bottom large card (centered under the two) -->
+        <section class="skill-card bottom-card" id="card-editing">
+          <div class="img">
+            <!-- Replace src with your editing image path -->
+            <img src="images/editing.jpg" alt="Editing image (replace with your own)" onerror="this.style.display='none'">
+          </div>
+          <div class="skill-title">Editing — MoGraph & AMV</div>
+          <div class="skill-text">
+            I use Alight Motion professionally for Motion Graphics (MoGraph). I create cinematic AMVs, manga edits, relatable shorts, and advanced
+            MoGraph sequences featuring detailed motion, transitions, and syncing to beats. I focus on rhythm, pacing and aesthetic cohesion.
+            <br><br>
+            <strong>Specialties:</strong> layered animation, particle overlays, motion-compositing, advanced keyframe choreography and clean export pipelines.
+            <br><br>
+            I can provide tutorials, project walkthroughs, templates, and full edits on demand.
+          </div>
+        </section>
+
+      </main>
+
+    </div>
+  </div>
+
+<script>
+  /********* Particles (white-ish "mana" rising) *********/
+  (function createParticles(){
+    const wrap = document.getElementById('particles');
+    const count = Math.max(24, Math.min(120, Math.floor(window.innerWidth/12))); // scale with width
+    for(let i=0;i<count;i++){
+      const p = document.createElement('div');
+      p.className = 'particle';
+      // random horizontal position (some outside to create spread)
+      p.style.left = (Math.random()*110 - 5) + 'vw';
+      // start below bottom so they rise into view
+      p.style.top = (80 + Math.random()*30) + 'vh';
+      const scale = 0.6 + Math.random()*1.2;
+      p.style.transform = `translateY(0) scale(${scale})`;
+      // vary opacity and size slightly
+      p.style.opacity = (0.4 + Math.random()*0.9).toString();
+      const size = (3 + Math.random()*7);
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      wrap.appendChild(p);
+
+      // animate each particle with different duration/delay
+      const duration = 8000 + Math.random()*12000; // 8s - 20s
+      const delay = Math.random()*2000;
+
+      // use Web Animations API for smoother control
+      p.animate([
+        { transform: `translateY(0px) scale(${scale})`, opacity: p.style.opacity },
+        { transform: `translateY(-120vh) scale(${0.6+Math.random()*1.1})`, opacity: 0.0 }
+      ], {
+        duration: duration,
+        delay: delay,
+        iterations: Infinity,
+        easing: 'linear'
+      });
+    }
+  })();
+
+  /********* Fill attribute bars (animated) *********/
+  document.addEventListener('DOMContentLoaded', () => {
+    const fills = document.querySelectorAll('.bar-fill');
+    fills.forEach((el, i) => {
+      const w = el.getAttribute('data-fill') || '60%';
+      // animate with slight delays for stagger effect
+      setTimeout(()=> el.style.width = w, 300 + i*220);
+    });
+  });
+
+  /********* Optional: make cards draggable-ish on mousemove for subtle parallax *********/
+  (function cardParallax(){
+    const container = document.querySelector('.system');
+    if(!container) return;
+    container.addEventListener('mousemove', (e) => {
+      const cx = container.clientWidth/2;
+      const cy = container.clientHeight/2;
+      const dx = (e.clientX - container.getBoundingClientRect().left) - cx;
+      const dy = (e.clientY - container.getBoundingClientRect().top) - cy;
+      const cards = document.querySelectorAll('.skill-card');
+      cards.forEach((card, idx) => {
+        const depth = (idx % 3 + 1) * 6;
+        const tx = (dx / cx) * depth;
+        const ty = (dy / cy) * depth;
+        card.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+      });
+    });
+    container.addEventListener('mouseleave', () => {
+      document.querySelectorAll('.skill-card').forEach(c => c.style.transform = '');
+    });
+  })();
+
+</script>
+
+</body>
+</html>

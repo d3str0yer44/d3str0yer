@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Death</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-dark: #07020a;
+    --panel-purple: rgba(120,0,160,0.22);
+    --border-purple: rgba(170,80,255,0.95);
+    --glow-purple: rgba(180,90,255,0.25);
+    --accent: #d6a8ff;
+    --glass-border: rgba(200,120,255,0.18);
+  }
+
+  body {
+    margin:0;
+    height:100vh;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(180deg, #06010a 0%, #070217 100%);
+    color: #eae0ff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    position:relative;
+  }
+
+  /* Overlay blur */
+  body::before {
+    content:"";
+    position:absolute;
+    inset:0;
+    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,0.25);
+    z-index:0;
+  }
+
+  .system-wrap {
+    position: relative;
+    z-index:1;
+    width: 90%;
+    max-width: 500px;
+  }
+
+  .system {
+    border-radius:14px;
+    background: linear-gradient(180deg, rgba(10,6,20,0.6), rgba(5,6,18,0.45));
+    border: 2px solid var(--glass-border);
+    box-shadow: 0 0 40px rgba(140,45,255,0.12), inset 0 0 30px rgba(80,20,140,0.08);
+    padding: 28px;
+    position: relative;
+  }
+
+  .system::before {
+    content:''; position:absolute; inset:0; border-radius:14px;
+    pointer-events:none;
+    box-shadow: 0 0 45px rgba(170,80,255,0.14), inset 0 0 30px rgba(150,50,255,0.08);
+    border: 2px solid rgba(180,100,255,0.06);
+    mix-blend-mode: screen;
+  }
+
+  .sys-header {
+    font-family:'Orbitron',sans-serif;
+    color:var(--accent);
+    font-size:16px;
+    letter-spacing:2px;
+    text-align:center;
+    margin-bottom:20px;
+    border:1px solid rgba(200,150,255,0.06);
+    padding:6px 12px;
+    border-radius:8px;
+    background: linear-gradient(90deg, rgba(20,6,40,0.3), rgba(8,3,24,0.35));
+    box-shadow: 0 6px 18px rgba(150,60,255,0.06);
+  }
+
+  .contact-form input,
+  .contact-form textarea {
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border-radius:10px;
+    border:1px solid rgba(180,100,255,0.3);
+    background: rgba(20,10,40,0.4);
+    color:#fff;
+    font-size:14px;
+  }
+
+  .contact-form textarea {
+    resize:none;
+    height:100px;
+  }
+
+  .contact-form button {
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border-radius:10px;
+    border:none;
+    background: linear-gradient(90deg, #aa50ff, #d678ff);
+    color:#fff;
+    font-weight:bold;
+    font-size:15px;
+    cursor:pointer;
+    transition: all 0.3s ease;
+  }
+
+  .contact-form button:hover {
+    background: linear-gradient(90deg, #d678ff, #aa50ff);
+  }
+
+  .send-msg {
+    margin-top:12px;
+    font-size:14px;
+    color: var(--accent);
+    text-align:center;
+    opacity:0;
+    transition: opacity 0.4s ease;
+  }
+
+  .char-count {
+    text-align:right;
+    font-size:12px;
+    color: rgba(200,180,255,0.7);
+  }
+</style>
+</head>
+<body>
+
+<div class="system-wrap">
+  <div class="system">
+    <div class="sys-header">CONTACT MONARCH — DEATH</div>
+
+    <form class="contact-form" id="contactForm" action="https://getform.io/f/aqoqnzqa" method="POST" target="_blank">	
+      <input type="hidden" name="nickname" value="Death">
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="email" name="email" placeholder="Your Email" required>
+      <textarea name="message" placeholder="Your Message to Death..." required maxlength="200"></textarea>
+      <div class="char-count" id="charCount">0/200</div>
+      <button type="submit">Send Message</button>
+      <div class="send-msg" id="sendMsg">Message sent successfully! 👑</div>
+    </form>
+
+  </div>
+</div>
+
+<script>
+const form = document.getElementById('contactForm');
+const sendMsg = document.getElementById('sendMsg');
+const messageInput = form.querySelector('textarea');
+const charCount = document.getElementById('charCount');
+
+// Character counter
+messageInput.addEventListener('input', () => {
+    charCount.textContent = `${messageInput.value.length}/200`;
+});
+
+// 24-hour submission limit
+form.addEventListener('submit', e=>{
+    e.preventDefault();
+
+    const lastSent = localStorage.getItem('lastSent');
+    const now = Date.now();
+
+    if(lastSent && now - lastSent < 24*60*60*1000){
+        alert("You can only send one message every 24 hours!");
+        return;
+    }
+
+    // submit form to Getform
+    form.submit();
+
+    // store timestamp
+    localStorage.setItem('lastSent', now);
+
+    // show animation
+    sendMsg.style.opacity='1';
+    setTimeout(()=>{
+        form.reset();
+        charCount.textContent = "0/200";
+        sendMsg.style.opacity='0';
+    }, 2000);
+});
+</script>
+
+</body>
+</html>

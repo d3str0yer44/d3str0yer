@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mystery — Death's Page</title>
+<style>
+
+/* ===== GENERAL STYLES ===== */
+body { 
+  margin:0; 
+  background:#010101; 
+  overflow:hidden; 
+  font-family:sans-serif; 
+  color:#fff; 
+}
+
+/* ===== MAIN DRAGGABLE CLOUD ===== */
+#cloud {
+  position:absolute;
+  width:260px;
+  cursor:pointer;
+  transition:0.3s;
+  user-select:none;
+  pointer-events:auto;
+}
+
+#cloud img {
+  width:100%;
+  height:auto;
+  pointer-events:none;
+  user-select:none;
+  filter:none;
+}
+
+/* ===== PUZZLE CONTAINER ===== */
+#puzzleContainer { 
+  display:none; 
+  position:fixed; 
+  inset:10%; 
+  background:#111; 
+  border:2px solid #8800ff; 
+  border-radius:12px; 
+  z-index:100; 
+  padding:10px; 
+}
+
+/* pieces */
+#puzzlePieces .piece { 
+  border:1px solid #222; 
+  cursor:pointer; 
+  transition:0.2s; 
+}
+
+/* ===== UNVEIL BUTTON — GLOBAL TOP CENTER ===== */
+#unveilButton { 
+  display:none;
+  position:fixed; /* instead of absolute */
+  top:20px;
+  left:50%;
+  transform:translateX(-50%);
+  padding:12px 26px;
+  background:#8800ff;
+  border:none;
+  color:#fff;
+  font-size:18px;
+  font-weight:bold;
+  cursor:pointer;
+  border-radius:8px;
+  z-index:9999; /* highest always */
+}
+
+/* ===== MESSAGE BALLOONS ===== */
+.message { 
+  position:absolute; 
+  padding:8px 12px; 
+  background:rgba(255,255,255,0.1); 
+  border-radius:8px; 
+  color:#fff; 
+  pointer-events:none; 
+  opacity:0; 
+  transition:0.5s; 
+}
+
+/* ===== PARTICLES ===== */
+.particle { 
+  position:absolute; 
+  border-radius:50%; 
+  background:rgba(255,255,255,0.25);
+  width:4px; 
+  height:4px; 
+  animation:floatUp 8s linear infinite;
+}
+
+@keyframes floatUp {
+  0% { transform:translateY(0); opacity:0.4; }
+  40% { opacity:0.9; }
+  100% { transform:translateY(-110vh); opacity:0; }
+}
+
+/* ===== EXTRA CLOUDS ===== */
+.extra-cloud { 
+  position:absolute; 
+  width:100px; 
+  height:60px; 
+  background:rgba(255,255,255,0.05); 
+  border-radius:50%; 
+}
+
+/* ===== FILLER ===== */
+.filler { 
+  position:absolute; 
+  width:50px; 
+  height:50px; 
+  background:rgba(255,255,255,0.05); 
+  border-radius:50%; 
+}
+
+</style>
+</head>
+<body>
+
+<!-- GLOBAL UNVEIL BUTTON -->
+<button id="unveilButton" onclick="window.location.href='rickroll.html'">Unveil the Mystery</button>
+
+<!-- MAIN CLOUD -->
+<div id="cloud">
+  <img src="cloud.jpg" alt="cloud">
+</div>
+
+<!-- EXTRA CLOUDS -->
+<div class="extra-cloud" style="top:50px; left:200px;"></div>
+<div class="extra-cloud" style="top:150px; left:400px;"></div>
+<div class="extra-cloud" style="top:300px; left:100px;"></div>
+
+<!-- PARTICLES -->
+<div id="particles"></div>
+
+<!-- MESSAGE BALLOON -->
+<div id="msg" class="message">Keep exploring...</div>
+
+<!-- PUZZLE SCREEN -->
+<div id="puzzleContainer">
+  <div id="puzzlePieces" style="position:relative; width:100%; height:80%;"></div>
+</div>
+
+<script>
+
+/* ========== PARTICLES ========== */
+(function createParticles(){
+  const wrap = document.getElementById('particles');
+  const count = 110;
+  for(let i=0;i<count;i++){
+    const p = document.createElement('div');
+    p.className='particle';
+    p.style.left=Math.random()*100+'vw';
+    p.style.top=Math.random()*100+'vh';
+    p.style.animationDuration = (6 + Math.random()*5) + 's';
+    p.style.width=(2+Math.random()*3)+'px';
+    p.style.height=(2+Math.random()*3)+'px';
+    wrap.appendChild(p);
+  }
+})();
+
+/* ========== CLOUD DRAGGING ========== */
+const cloud = document.getElementById('cloud');
+let dragging=false, offsetX, offsetY;
+
+cloud.addEventListener('mousedown', e => {
+  dragging=true;
+  offsetX = e.clientX - cloud.offsetLeft;
+  offsetY = e.clientY - cloud.offsetTop;
+});
+
+document.addEventListener('mousemove', e => {
+  if(dragging){
+    cloud.style.left = (e.clientX - offsetX) + 'px';
+    cloud.style.top  = (e.clientY - offsetY) + 'px';
+  }
+});
+
+document.addEventListener('mouseup', () => {
+  dragging=false;
+
+  if(cloud.offsetLeft + cloud.offsetWidth > window.innerWidth - 50){
+    document.getElementById('puzzleContainer').style.display='block';
+    cloud.style.display='none';
+    initPuzzle();
+  }
+});
+
+/* ========== MESSAGE POPUP ========== */
+const msg = document.getElementById('msg');
+
+function showMessage(text, x, y){
+  msg.innerText=text;
+  msg.style.left=x+'px';
+  msg.style.top=y+'px';
+  msg.style.opacity=1;
+  setTimeout(()=>{ msg.style.opacity=0; }, 2000);
+}
+
+document.addEventListener('click', e=>{
+  if(cloud.style.display!=='none'){
+    const texts=['Keep exploring...','Try moving me','Something hides there','Drag me to the right'];
+    showMessage(texts[Math.floor(Math.random()*texts.length)], e.clientX, e.clientY);
+  }
+});
+
+/* ========== PUZZLE LOGIC ========== */
+function initPuzzle(){
+  const puzzleContainer = document.getElementById('puzzleContainer');
+  const puzzlePiecesDiv = document.getElementById('puzzlePieces');
+  const unveilButton = document.getElementById('unveilButton');
+  const puzzleImage='puzzle.jpg';
+
+  const rows=3, cols=3;
+  const pieceWidth = puzzleContainer.clientWidth/cols;
+  const pieceHeight = puzzleContainer.clientHeight/rows;
+
+  let pieces=[], solvedPositions=[];
+
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const piece=document.createElement('div');
+      piece.className='piece';
+      piece.style.position='absolute';
+      piece.style.width=pieceWidth+'px';
+      piece.style.height=pieceHeight+'px';
+
+      piece.style.backgroundImage=`url(${puzzleImage})`;
+      piece.style.backgroundSize=`${cols*100}% ${rows*100}%`;
+      piece.style.backgroundPosition=`-${c*pieceWidth}px -${r*pieceHeight}px`;
+
+      piece.style.left=Math.random()*(puzzleContainer.clientWidth-pieceWidth)+'px';
+      piece.style.top=Math.random()*(puzzleContainer.clientHeight-pieceHeight)+'px';
+
+      puzzlePiecesDiv.appendChild(piece);
+      pieces.push(piece);
+      solvedPositions.push({x:c*pieceWidth, y:r*pieceHeight});
+
+      makeDraggable(piece, c*pieceWidth, r*pieceHeight);
+    }
+  }
+
+  function makeDraggable(piece, correctX, correctY){
+   let offsetX, offsetY;
+
+   piece.addEventListener('mousedown', startDrag);
+
+   function startDrag(e){
+     offsetX = e.clientX - piece.offsetLeft;
+     offsetY = e.clientY - piece.offsetTop;
+
+     document.addEventListener('mousemove', move);
+     document.addEventListener('mouseup', stop);
+     piece.style.zIndex=1000;
+   }
+
+   function move(e){
+     piece.style.left = (e.clientX - offsetX) + 'px';
+     piece.style.top  = (e.clientY - offsetY) + 'px';
+   }
+
+   function stop(){
+     document.removeEventListener('mousemove', move);
+     document.removeEventListener('mouseup', stop);
+
+     const dx = piece.offsetLeft - correctX;
+     const dy = piece.offsetTop - correctY;
+
+     if(Math.abs(dx)<20 && Math.abs(dy)<20){
+       piece.style.left = correctX+'px';
+       piece.style.top = correctY+'px';
+     }
+
+     checkSolved();
+   }
+  }
+
+  function checkSolved(){
+    const solved = pieces.every((piece,index)=>{
+      const dx = Math.abs(parseInt(piece.style.left) - solvedPositions[index].x);
+      const dy = Math.abs(parseInt(piece.style.top) - solvedPositions[index].y);
+      return dx <= 5 && dy <= 5;
+    });
+
+    if(solved){
+      unveilButton.style.display='block';
+    }
+  }
+}
+
+/* ========== RANDOM FILLER ========== */
+for(let i=0;i<150;i++){ 
+  const f=document.createElement('div'); 
+  f.className='filler'; 
+  f.style.top=Math.random()*100+'vh'; 
+  f.style.left=Math.random()*100+'vw'; 
+  document.body.appendChild(f); 
+}
+
+</script>
+
+</body>
+</html>

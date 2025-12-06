@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rickrolled — Jinwoo System</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg-dark: #07020a;
+  --panel-purple: rgba(120,0,160,0.22);
+  --border-purple: rgba(170,80,255,0.95);
+  --glow-purple: rgba(180,90,255,0.25);
+  --accent: #d6a8ff;
+  --glass-border: rgba(200,120,255,0.18);
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html, body{ width:100%; height:100%; font-family:'Poppins',sans-serif; background: linear-gradient(180deg,#06010a 0%,#070217 100%); color:#eae0ff; overflow:hidden; }
+
+.tech-frame {
+  position:fixed; top:18px; left:18px; right:18px; bottom:18px;
+  border-radius:18px; border:2px solid rgba(120,20,200,0.55);
+  box-shadow: 0 0 60px rgba(140,45,255,0.45), inset 0 0 40px rgba(110,20,200,0.35);
+  pointer-events:none; z-index:1;
+}
+
+.tech-rail-top, .tech-rail-left, .tech-rail-right { position:absolute; pointer-events:none; }
+.tech-rail-top { height:10px; left:40px; right:40px; top:8px; border-top:3px solid var(--border-purple); box-shadow:0 0 18px var(--border-purple); border-radius:6px; }
+.tech-rail-left { width:10px; top:40px; bottom:40px; left:8px; border-left:3px solid var(--border-purple); box-shadow:0 0 18px var(--border-purple); border-radius:6px; }
+.tech-rail-right { width:10px; top:40px; bottom:40px; right:8px; border-right:3px solid var(--border-purple); box-shadow:0 0 18px var(--border-purple); border-radius:6px; }
+
+.particles { position:fixed; inset:0; z-index:2; overflow:hidden; pointer-events:none; }
+.particle { position:absolute; width:6px; height:6px; background:rgba(255,255,255,0.85); border-radius:50%; filter:blur(0.3px); opacity:0.9; box-shadow:0 0 8px rgba(255,255,255,0.6); }
+
+.system-wrap { position:absolute; inset:6vh 4vw; z-index:3; display:flex; align-items:center; justify-content:center; padding:2vh 2vw; }
+.system { width:100%; height:88vh; max-width:1350px; border-radius:14px; background: linear-gradient(180deg, rgba(10,6,20,0.6), rgba(5,6,18,0.45)); border:2px solid var(--glass-border); box-shadow:0 0 40px rgba(140,45,255,0.12), inset 0 0 30px rgba(80,20,140,0.08); display:grid; grid-template-columns: 1fr; position:relative; }
+.system::before { content:''; position:absolute; inset:0; border-radius:14px; pointer-events:none; box-shadow:0 0 45px rgba(170,80,255,0.14), inset 0 0 30px rgba(150,50,255,0.08); border:2px solid rgba(180,100,255,0.06); mix-blend-mode: screen; }
+.system-outline { position:absolute; inset:-8px; border-radius:18px; pointer-events:none; box-shadow:0 0 70px rgba(160,60,255,0.18); border:1px solid rgba(170,90,255,0.12); }
+
+.sys-header { position:absolute; top:14px; left:50%; transform:translateX(-50%); font-family:'Orbitron',sans-serif; color:var(--accent); font-size:13px; letter-spacing:3px; padding:6px 12px; border-radius:8px; border:1px solid rgba(200,150,255,0.06); background: linear-gradient(90deg, rgba(20,6,40,0.3), rgba(8,3,24,0.35)); box-shadow:0 6px 18px rgba(150,60,255,0.06); }
+
+.video-card { width:100%; height:100%; background: rgba(28,6,44,0.36); border:1px solid rgba(190,120,255,0.12); border-radius:14px; display:flex; align-items:center; justify-content:center; padding:12px; box-shadow: 0 14px 28px rgba(110,30,180,0.06), inset 0 0 18px rgba(110,30,180,0.03); }
+.video-card video { width:100%; height:100%; border-radius:12px; border:2px solid var(--accent); object-fit:cover; }
+
+@media(max-width:980px){ .system{ grid-template-columns:1fr; height:auto; } .sys-header{ left:16px; transform:translateX(0); } }
+</style>
+</head>
+<body>
+
+<!-- Tech Frame & Rails -->
+<div class="tech-frame">
+  <div class="tech-rail-top"></div>
+  <div class="tech-rail-left"></div>
+  <div class="tech-rail-right"></div>
+</div>
+
+<!-- Particle mana -->
+<div class="particles" id="particles"></div>
+
+<!-- Central System Window -->
+<div class="system-wrap">
+  <div class="system">
+    <div class="system-outline"></div>
+    <div class="sys-header">RICK ROLL</div>
+
+    <div class="video-card">
+      <video autoplay controls>
+        <source src="rickroll.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </div>
+</div>
+
+<script>
+/* Particle generation */
+(function(){
+  const wrap = document.getElementById('particles');
+  const count = Math.max(24, Math.min(120, Math.floor(window.innerWidth/12)));
+  for(let i=0;i<count;i++){
+    const p = document.createElement('div'); p.className='particle';
+    p.style.left=(Math.random()*110-5)+'vw';
+    p.style.top=(80+Math.random()*30)+'vh';
+    const s=0.6+Math.random()*1.2;
+    p.style.transform=`translateY(0) scale(${s})`;
+    p.style.opacity=(0.4+Math.random()*0.9);
+    const sz=3+Math.random()*7;
+    p.style.width=sz+'px'; p.style.height=sz+'px';
+    wrap.appendChild(p);
+    const duration=8000+Math.random()*12000;
+    const delay=Math.random()*2000;
+    p.animate([{transform:`translateY(0px) scale(${s})`,opacity:p.style.opacity},{transform:`translateY(-120vh) scale(${0.6+Math.random()*1.1})`,opacity:0}],{duration:duration,delay:delay,iterations:Infinity,easing:'linear'});
+  }
+})();
+</script>
+
+</body>
+</html>

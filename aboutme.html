@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About Me — Shadow Terminal</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg-dark: #07020a;
+  --panel-purple: rgba(120, 0, 160, 0.18);
+  --border-purple: rgba(170,80,255,0.95);
+  --accent: #d6a8ff;
+  --soft-purple: rgba(180,100,255,0.16);
+  --glass-border: rgba(200,120,255,0.18);
+}
+
+/* reset / box-sizing */
+*{ box-sizing: border-box; }
+html,body{
+  margin:0;
+  padding:0;
+  background: linear-gradient(180deg, #06010a 0%, #070217 100%);
+  font-family:'Poppins', sans-serif;
+  color:#eee0ff;
+  /* allow page scrolling (was overflow:hidden before) */
+  min-height:100%;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow:auto;
+}
+
+/* FRAME + RAILS (visual decoration) */
+.tech-frame{
+  position:fixed; top:18px; bottom:18px; left:18px; right:18px;
+  border-radius:18px;
+  border: 2px solid rgba(120,20,200,0.55);
+  box-shadow:0 0 60px rgba(140,45,255,0.45), inset 0 0 40px rgba(110,20,200,0.35);
+  pointer-events:none;
+  z-index:5;
+}
+
+.tech-rail-top, .tech-rail-left, .tech-rail-right{
+  position:absolute; pointer-events:none;
+}
+.tech-rail-top{
+  top:8px; left:40px; right:40px; height:10px;
+  border-top:3px solid var(--border-purple);
+  box-shadow:0 0 18px var(--border-purple);
+  border-radius:6px;
+}
+.tech-rail-left{
+  top:40px; bottom:40px; left:8px; width:10px;
+  border-left:3px solid var(--border-purple);
+  box-shadow:0 0 18px var(--border-purple);
+  border-radius:6px;
+}
+.tech-rail-right{
+  top:40px; bottom:40px; right:8px; width:10px;
+  border-right:3px solid var(--border-purple);
+  box-shadow:0 0 18px var(--border-purple);
+  border-radius:6px;
+}
+
+/* PARTICLES (background floating dots) */
+.particles{
+  position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:2;
+}
+.particle{
+  position:absolute; border-radius:50%;
+  background:rgba(255,255,255,0.9); width:4px; height:4px; opacity:0.9;
+  filter:blur(0.3px);
+  box-shadow:0 0 8px rgba(255,255,255,0.6);
+}
+
+/* MAIN LAYOUT: center the system window but allow page scrolling under/around it */
+.container {
+  width: calc(100% - 8vw);
+  max-width: 1350px;
+  margin: 6vh auto; /* spacing from top and bottom, allows page scroll */
+  position: relative;
+  z-index:3;
+}
+
+/* SYSTEM WINDOW (now flexible height) */
+.system{
+  width:100%;
+  background: linear-gradient(180deg, rgba(10,6,20,0.6), rgba(5,6,18,0.45));
+  border: 2px solid var(--glass-border);
+  border-radius:14px;
+  padding:34px;
+  box-shadow:0 0 45px rgba(170,80,255,0.14), inset 0 0 30px rgba(150,50,255,0.08);
+  position:relative;
+  overflow:visible; /* allow internal scrolling region to handle overflow */
+}
+
+/* small header badge */
+.sys-header{
+  position:absolute;
+  top:14px; left:50%; transform:translateX(-50%);
+  font-family:'Orbitron',sans-serif;
+  color:var(--accent);
+  letter-spacing:4px;
+  font-size:14px;
+  padding:6px 14px;
+  border-radius:8px;
+  border:1px solid rgba(200,150,255,0.06);
+  background:linear-gradient(90deg, rgba(20,6,40,0.3), rgba(8,3,24,0.35));
+  z-index:6;
+}
+
+/* ABOUT CONTENT: use a max-height so it becomes scrollable inside the panel if long */
+.about-content{
+  margin-top:40px;
+  /* allow the panel to be max 75vh tall then scroll inside it */
+  max-height: 75vh;
+  overflow-y:auto;
+  padding-right:12px;
+  padding-bottom:8px;
+}
+
+/* sections */
+.section{
+  background:linear-gradient(180deg, rgba(30,0,50,0.32), rgba(8,2,20,0.28));
+  border:1px solid var(--soft-purple);
+  border-radius:14px;
+  padding:26px;
+  margin-bottom:28px;
+  box-shadow:0 14px 28px rgba(110,30,180,0.06);
+}
+
+.section-title{
+  font-family:'Orbitron'; font-size:22px; color:var(--accent);
+  margin-bottom:12px; letter-spacing:2px;
+}
+
+.section-text{
+  font-size:15px; line-height:1.7;
+  color:#e9dbff;
+}
+
+/* IMAGE BANNER */
+.banner{
+  width:100%; height:280px;
+  border-radius:12px; overflow:hidden;
+  background:url('piccy.jpg') center/cover;
+  box-shadow:0 0 25px rgba(160,60,255,0.18);
+  margin-bottom:30px;
+}
+
+/* visible custom scrollbar for the inner panel */
+.about-content::-webkit-scrollbar{ width:10px; }
+.about-content::-webkit-scrollbar-thumb{
+  background:rgba(170,80,255,0.25);
+  border-radius:10px;
+  border:3px solid rgba(10,6,20,0.4);
+}
+
+/* page-level scrollbar (keeps small and subtle) */
+::-webkit-scrollbar{ height:10px; width:10px; }
+::-webkit-scrollbar-thumb{
+  background: rgba(100,40,150,0.12);
+  border-radius:10px;
+  border:2px solid transparent;
+}
+
+/* responsive tweaks */
+@media (max-width:980px){
+  .container{ width:94%; margin:4vh auto; }
+  .banner { height:180px; }
+  .section { padding:18px; }
+  .section-title { font-size:18px; }
+}
+</style>
+</head>
+<body>
+
+<div class="tech-frame" aria-hidden="true">
+  <div class="tech-rail-top"></div>
+  <div class="tech-rail-left"></div>
+  <div class="tech-rail-right"></div>
+</div>
+
+<div class="particles" id="particles" aria-hidden="true"></div>
+
+<div class="container">
+  <div class="system" role="region" aria-label="About — Shadow File">
+    <div class="sys-header">ABOUT — SHADOW FILE</div>
+
+    <div class="about-content" id="aboutContent">
+      <div class="banner" aria-hidden="true"></div>
+
+      <div class="section">
+        <div class="section-title">WHO I AM</div>
+        <div class="section-text">
+          I’m d3str0yer, also known Death itself, people also sometimes term me as an prodigy for my exceptional skills.
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">MY EDITING SKILLS</div>
+        <div class="section-text">
+		  I use alight motion for editing, i can make any type of edits, if you have an refrence, i can make you its exact<
+		  copy in <br>your version, or even a better one. I can make manga edits, amvs, movie edits, relatable edits, but i am
+		  specialised in mo-graph edits.
+          
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">MY AI SKILLS</div>
+        <div class="section-text">
+          AI is the biggest weapon in today's world, I can use it to create websites, design UIs, make models, make blueprints, get ideas.<br>
+          The most important i use AI for is to design models, and get ideas, its exceptional in coding too.		  
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">MY PHILOSOPHY</div>
+        <div class="section-text">
+          I believe god exists, okay he is GOD, the creator, but i always wonder, why god sent us here at the first place, has everything been <br>
+		  already written?.. NO, everything is not written, rather our decisions influence our life, its just that we blame GOD for our misfotunes.
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">THE FUTURE</div>
+        <div class="section-text">
+          ssssssI know i'm good at editing, and many other skills, but i always knew, i had to proceed in the field computer, specifically coding.<br>
+		  Coding is one of the most important skills, it helps us automate things, design applications, design websites, and many more.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function createParticles(){
+  const wrap = document.getElementById('particles');
+  const count = 60;
+  for(let i=0; i<count; i++){
+    const p = document.createElement('div');
+    p.className='particle';
+    p.style.left = Math.random()*100 + 'vw';
+    p.style.top = (Math.random()*80+20) + 'vh';
+    wrap.appendChild(p);
+
+    const duration = 7000 + Math.random()*8000;
+    const delay = Math.random()*2000;
+
+    p.animate([
+      { transform: 'translateY(0)', opacity: 1 },
+      { transform: 'translateY(-120vh)', opacity: 0 }
+    ],{
+      duration: duration,
+      delay: delay,
+      iterations: Infinity,
+      easing: 'linear'
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
+	
